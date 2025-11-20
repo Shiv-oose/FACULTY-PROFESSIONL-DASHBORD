@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { React, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Users, Plus, Mail, Search, Edit2, Trash2, UserCheck, BookOpen, Award } from 'lucide-react';
 import { Card } from './ui/card';
@@ -7,8 +7,8 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { toast } from 'sonner@2.0.3';
-import { apiRequest } from '../utils/api';
+import toast from 'react-hot-toast';
+import { apiClient, apiRequest } from '../utils/api';
 import SampleFacultySeeder from './SampleFacultySeeder';
 
 interface Faculty {
@@ -32,6 +32,11 @@ export default function FacultyManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingFaculty, setEditingFaculty] = useState<Faculty | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deletingFaculty, setDeletingFaculty] = useState<Faculty | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -40,6 +45,16 @@ export default function FacultyManagement() {
     department: '',
     position: '',
     joiningDate: new Date().toISOString().split('T')[0],
+  });
+
+  // Edit form state
+  const [editFormData, setEditFormData] = useState({
+    id: '',
+    name: '',
+    email: '',
+    department: '',
+    position: '',
+    joiningDate: '',
   });
 
   useEffect(() => {
@@ -109,7 +124,7 @@ export default function FacultyManagement() {
         if (response.emailSent) {
           toast.success(`Credentials sent to ${formData.email}`);
         } else {
-          toast.warning('Faculty added but email notification failed');
+          toast.error('Faculty added but email notification failed');
         }
 
         // Reset form and reload list
@@ -133,25 +148,74 @@ export default function FacultyManagement() {
     }
   };
 
-  const handleDeleteFaculty = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to remove ${name}?`)) {
-      return;
-    }
+  const handleDeleteClick = (faculty: Faculty) => {
+    setDeletingFaculty(faculty);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingFaculty) return;
 
     try {
-      const response = await apiRequest(`/faculty/delete/${id}`, {
+      const response = await apiRequest(`/faculty/delete/${deletingFaculty.id}`, {
         method: 'DELETE',
       });
 
       if (response.success) {
         toast.success('Faculty member removed successfully');
         loadFaculties();
+        setIsDeleteDialogOpen(false);
+        setDeletingFaculty(null);
       } else {
         toast.error('Failed to remove faculty member');
       }
     } catch (error) {
       console.error('Error deleting faculty:', error);
       toast.error('Failed to remove faculty member');
+    }
+  };
+
+  const handleEditClick = (faculty: Faculty) => {
+    setEditingFaculty(faculty);
+    setEditFormData({
+      id: faculty.id,
+      name: faculty.name,
+      email: faculty.email,
+      department: faculty.department,
+      position: faculty.position,
+      joiningDate: faculty.joiningDate.split('T')[0],
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateFaculty = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingFaculty) return;
+
+    setIsUpdating(true);
+    const updateData = { ...editFormData };
+
+    try {
+      const response = await apiRequest(`/faculty/update/${editingFaculty.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          ...updateData,
+          joiningDate: new Date(updateData.joiningDate).toISOString(),
+        }),
+      });
+      if (response.success) {
+        toast.success('Faculty member updated successfully');
+        setIsEditDialogOpen(false);
+        setEditingFaculty(null);
+        loadFaculties();
+      } else {
+        toast.error(response.error || 'Failed to update faculty member');
+      }
+    } catch (error) {
+      console.error('Error updating faculty:', error);
+      toast.error('Failed to update faculty member');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -227,9 +291,6 @@ export default function FacultyManagement() {
             <DialogContent className="bg-[#16213E] border-white/10 text-[#F0F0F0] max-w-2xl" aria-describedby={undefined}>
               <DialogHeader>
                 <DialogTitle className="text-2xl mb-2">Add New Faculty Member</DialogTitle>
-                <p className="text-sm text-[#A0A0A0]">
-                  Enter faculty details. Login credentials will be auto-generated and sent via email.
-                </p>
               </DialogHeader>
 
               <form onSubmit={handleAddFaculty} className="space-y-4 mt-4">
@@ -314,7 +375,7 @@ export default function FacultyManagement() {
                   />
                 </div>
 
-                <div className="p-4 rounded-lg bg-[#00D9FF]/10 border border-[#00D9FF]/20">
+                {/* <div className="p-4 rounded-lg bg-[#00D9FF]/10 border border-[#00D9FF]/20">
                   <div className="flex items-start gap-3">
                     <Mail size={20} className="text-[#00D9FF] mt-0.5" />
                     <div className="text-sm">
@@ -324,7 +385,7 @@ export default function FacultyManagement() {
                       </p>
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 <div className="flex gap-3 pt-4">
                   <Button
@@ -340,7 +401,7 @@ export default function FacultyManagement() {
                     ) : (
                       <>
                         <Plus size={18} className="mr-2" />
-                        Add Faculty & Send Credentials
+                        Add Faculty
                       </>
                     )}
                   </Button>
@@ -493,7 +554,7 @@ export default function FacultyManagement() {
                   </div>
 
                   <div className="flex items-center gap-2 ml-4">
-                    <Button
+                    {/* <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => handleResendCredentials(faculty)}
@@ -502,19 +563,20 @@ export default function FacultyManagement() {
                       title="Resend credentials via email"
                     >
                       <Mail size={16} />
-                    </Button>
+                    </Button> */}
                     <Button
                       size="sm"
                       variant="ghost"
                       className="text-[#A0A0A0] hover:bg-white/5"
-                      title="Edit faculty"
+                      title="Edit Faculty"
+                      onClick={() => handleEditClick(faculty)}
                     >
                       <Edit2 size={16} />
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleDeleteFaculty(faculty.id, faculty.name)}
+                      onClick={() => handleDeleteClick(faculty)}
                       className="text-[#FF006E] hover:bg-[#FF006E]/10"
                       title="Delete faculty"
                     >
@@ -527,6 +589,135 @@ export default function FacultyManagement() {
           </div>
         )}
       </Card>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="bg-[#16213E] border-white/10 text-[#F0F0F0] max-w-2xl" aria-describedby={undefined}>
+          <DialogHeader>
+            <DialogTitle className="text-2xl mb-2">Edit Faculty Member</DialogTitle>
+            <p className="text-sm text-[#A0A0A0]">
+              Update details for {editingFaculty?.name}.
+            </p>
+          </DialogHeader>
+
+          <form onSubmit={handleUpdateFaculty} className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Full Name *</Label>
+                <Input
+                  id="edit-name"
+                  value={editFormData.name}
+                  onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                  className="bg-white/5 border-white/10 text-[#F0F0F0]"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">Email Address *</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={editFormData.email}
+                  onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                  className="bg-white/5 border-white/10 text-[#F0F0F0]"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-department">Department *</Label>
+                <Select
+                  value={editFormData.department}
+                  onValueChange={(value) => setEditFormData({ ...editFormData, department: value })}
+                >
+                  <SelectTrigger className="bg-white/5 border-white/10 text-[#F0F0F0]">
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#16213E] border-white/10 text-[#F0F0F0]">
+                    {departments.map((dept) => <SelectItem key={dept} value={dept}>{dept}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-position">Position *</Label>
+                <Select
+                  value={editFormData.position}
+                  onValueChange={(value) => setEditFormData({ ...editFormData, position: value })}
+                >
+                  <SelectTrigger className="bg-white/5 border-white/10 text-[#F0F0F0]">
+                    <SelectValue placeholder="Select position" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#16213E] border-white/10 text-[#F0F0F0]">
+                    {positions.map((pos) => <SelectItem key={pos} value={pos}>{pos}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-joiningDate">Joining Date *</Label>
+              <Input
+                id="edit-joiningDate"
+                type="date"
+                value={editFormData.joiningDate}
+                onChange={(e) => setEditFormData({ ...editFormData, joiningDate: e.target.value })}
+                className="bg-white/5 border-white/10 text-[#F0F0F0]"
+                required
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button
+                type="submit"
+                disabled={isUpdating}
+                className="flex-1 bg-gradient-to-r from-[#00D9FF] to-[#00E5CC] text-white"
+              >
+                {isUpdating ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                    Saving...
+                  </>
+                ) : 'Save Changes'}
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setIsEditDialogOpen(false)} className="text-[#A0A0A0] hover:text-[#F0F0F0] hover:bg-white/5">
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="bg-[#16213E] border-white/10 text-[#F0F0F0] max-w-md" aria-describedby={undefined}>
+          <DialogHeader>
+            <DialogTitle className="text-2xl mb-2 text-[#FF006E]">Confirm Deletion</DialogTitle>
+          </DialogHeader>
+          {deletingFaculty && (
+            <div className="space-y-4 mt-4">
+              <p className="text-[#A0A0A0]">
+                Are you sure you want to permanently delete{' '}
+                <span className="font-bold text-[#F0F0F0]">{deletingFaculty.name}</span>?
+              </p>
+              <p className="text-sm text-[#A0A0A0]">
+                This action cannot be undone. All data associated with this faculty member will be removed.
+              </p>
+              <div className="flex gap-3 pt-4">
+                <Button onClick={confirmDelete} className="flex-1 bg-[#FF006E] hover:bg-[#EA005E] text-white">
+                  Yes
+                </Button>
+                <Button type="button" variant="ghost" onClick={() => setIsDeleteDialogOpen(false)} className="text-[#A0A0A0] hover:text-[#F0F0F0] hover:bg-white/5">
+                  No
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

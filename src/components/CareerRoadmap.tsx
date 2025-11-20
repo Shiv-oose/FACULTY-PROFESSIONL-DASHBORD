@@ -1,5 +1,7 @@
 import { motion } from 'motion/react';
 import { Target, TrendingUp, CheckCircle, Circle, Award, BookOpen, Users, Briefcase } from 'lucide-react';
+import { React, useState, useEffect } from 'react';
+
 
 export default function CareerRoadmap() {
   const promotionChecklist = [
@@ -212,7 +214,7 @@ export default function CareerRoadmap() {
                               ? 'bg-gradient-to-br from-[#00D9FF] to-[#00E5CC]'
                               : stage.status === 'current'
                               ? 'bg-gradient-to-br from-[#9D4EDD] to-[#7B2CBF]'
-                              : 'bg-white/10 border-2 border-white/20'
+                              : 'bg-gradient-to-br from-[#00D9FF] to-[#00E5CC]'
                           }`}
                         >
                           <Icon size={28} className="text-white" />

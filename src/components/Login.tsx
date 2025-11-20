@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { React, useState } from 'react';
 import { motion } from 'motion/react';
 import { GraduationCap, Shield, Lock, User, AlertCircle } from 'lucide-react';
 import { Button } from './ui/button';
@@ -20,14 +20,14 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const credentials = {
     faculty: {
       username: 'faculty@rntu.edu.in',
-      password: 'RNTU@Faculty2024',
-      displayName: 'Dr. Priya Sharma',
+      password: 'RNTU@Faculty',
+      displayName: 'Dr. Ayushi Mehra',
       department: 'Computer Science & Engineering'
     },
     admin: {
       username: 'admin@rntu.edu.in',
-      password: 'RNTU@Admin2024',
-      displayName: 'Prof. Rajesh Kumar',
+      password: 'RNTU@Admin',
+      displayName: 'Dr. Sangeeta Jauhari',
       position: 'Head of Administration'
     }
   };
@@ -108,7 +108,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-4xl mb-2 bg-gradient-to-r from-[#00D9FF] via-[#00E5CC] to-[#9D4EDD] bg-clip-text text-transparent"
+            className="mb-6 bg-gradient-to-r from-[#00D9FF] via-[#00E5CC] to-[#9D4EDD] bg-clip-text text-transparent text-3xl font-bold"
           >
             Rabindranath Tagore University
           </motion.h1>
@@ -124,7 +124,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
         {!selectedRole ? (
           /* Role Selection */
-          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className="grid mt-6 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             <motion.div
               initial={{ x: -50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
@@ -312,7 +312,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           transition={{ delay: 0.8 }}
           className="text-center mt-8 text-sm text-[#A0A0A0]"
         >
-          <p>© 2024 Rabindranath Tagore University. All rights reserved.</p>
+          <p>© 2025 Rabindranath Tagore University. All rights reserved.</p>
           <p className="mt-1">Empowering Faculty Excellence Through Technology</p>
         </motion.div>
       </motion.div>

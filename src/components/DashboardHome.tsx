@@ -1,9 +1,18 @@
 import { motion } from 'motion/react';
 import { TrendingUp, TrendingDown, Award, BookOpen, Users, Calendar } from 'lucide-react';
+import { React, useState } from 'react';
 import CareerProgress from './CareerProgress';
 import AchievementBadge from './AchievementBadge';
+import AddPublicationDialog from './AddPublicationDialog';
+import UpdateSkillsDialog from './UpdateSkillsDialog';
 
-export default function DashboardHome() {
+interface DashboardHomeProps {
+  onNavigate: (view: string) => void;
+}
+
+export default function DashboardHome({ onNavigate }: DashboardHomeProps) {
+  const [isAddPublicationOpen, setIsAddPublicationOpen] = useState(false);
+  const [isUpdateSkillsOpen, setIsUpdateSkillsOpen] = useState(false);
   const metrics = [
     {
       label: 'Total Publications',
@@ -75,7 +84,7 @@ export default function DashboardHome() {
                 <div className="flex gap-2">
                   {achievements.map((achievement, index) => (
                     <AchievementBadge
-                      key={index}
+                      // key={achievement.label}
                       label={achievement.label}
                       icon={achievement.icon}
                       color={achievement.color}
@@ -190,13 +199,22 @@ export default function DashboardHome() {
           >
             <h3 className="text-lg mb-4">Quick Actions</h3>
             <div className="space-y-3">
-              <button className="w-full px-4 py-3 bg-gradient-to-r from-[#00D9FF] to-[#00E5CC] text-[#0F1419] rounded-xl hover:shadow-lg hover:shadow-[#00D9FF]/20 transition-all duration-200 hover:transform hover:-translate-y-0.5">
+              <button
+                onClick={() => setIsAddPublicationOpen(true)}
+                className="w-full px-4 py-3 bg-gradient-to-r from-[#00D9FF] to-[#00E5CC] text-[#0F1419] rounded-xl hover:shadow-lg hover:shadow-[#00D9FF]/20 transition-all duration-200 hover:transform hover:-translate-y-0.5"
+              >
                 Add Publication
               </button>
-              <button className="w-full px-4 py-3 backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-200">
+              <button
+                onClick={() => onNavigate('fdp')}
+                className="w-full px-4 py-3 backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-200"
+              >
                 Register for FDP
               </button>
-              <button className="w-full px-4 py-3 backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-200">
+              <button
+                onClick={() => setIsUpdateSkillsOpen(true)}
+                className="w-full px-4 py-3 backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-200"
+              >
                 Update Skills
               </button>
             </div>
@@ -229,6 +247,18 @@ export default function DashboardHome() {
           </motion.div>
         </div>
       </div>
+
+      <AddPublicationDialog
+        isOpen={isAddPublicationOpen}
+        onOpenChange={setIsAddPublicationOpen}
+        onSuccess={() => { /* Optionally refresh data here */ }}
+      />
+
+      <UpdateSkillsDialog
+        isOpen={isUpdateSkillsOpen}
+        onOpenChange={setIsUpdateSkillsOpen}
+        onSuccess={() => { /* Optionally refresh data here */ }}
+      />
     </div>
   );
 }

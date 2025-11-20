@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { React, useState } from 'react';
 import { Users, Database } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { toast } from 'sonner@2.0.3';
+import toast from 'react-hot-toast';
 import { apiRequest } from '../utils/api';
 
 const sampleFacultyData = [
@@ -111,7 +111,7 @@ export default function SampleFacultySeeder({ onComplete }: SampleFacultySeederP
     }
     
     if (failCount > 0) {
-      toast.warning(`${failCount} faculty members could not be added (may already exist)`);
+      toast.error(`${failCount} faculty members could not be added (may already exist)`);
     }
   };
 

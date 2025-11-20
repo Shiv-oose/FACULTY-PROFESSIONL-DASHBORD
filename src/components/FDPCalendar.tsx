@@ -1,12 +1,12 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { Calendar as CalendarIcon, Clock, MapPin, Users, ExternalLink, Award, CheckCircle, Plus, X, Save } from 'lucide-react';
-import { useState } from 'react';
+import { React, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { toast } from 'sonner@2.0.3';
+import toast from 'react-hot-toast';
 
 interface FDPEvent {
   id: string;
@@ -218,7 +218,7 @@ export default function FDPCalendar() {
   };
 
   const handleViewDetails = (fdpId: string) => {
-    toast.info('Opening FDP details...');
+    toast('Opening FDP details...');
   };
 
   // Generate calendar data
@@ -338,13 +338,13 @@ export default function FDPCalendar() {
                     <div className="flex items-center justify-between pt-4 border-t border-white/10">
                       <span className="text-sm text-[#A0A0A0]">{fdp.registrationDeadline}</span>
                       <div className="flex gap-2">
-                        <button 
+                        {/* <button 
                           onClick={() => handleViewDetails(fdp.id)}
                           className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex items-center gap-2"
                         >
                           <ExternalLink size={14} />
                           Details
-                        </button>
+                        </button> */}
                         <button 
                           onClick={() => handleRegister(fdp.id)}
                           className="px-4 py-2 bg-gradient-to-r from-[#00D9FF] to-[#00E5CC] text-[#0F1419] rounded-lg hover:shadow-lg hover:shadow-[#00D9FF]/20 transition-all duration-200"

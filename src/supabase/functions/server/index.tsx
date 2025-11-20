@@ -32,6 +32,22 @@ async function getUserOrDemo(authorization: string | null) {
   return { userId: demoUserId, isDemo: true };
 }
 
+// Helper function to strictly verify an authenticated user
+async function verifyUser(authorization: string | null) {
+  if (!authorization) {
+    return null;
+  }
+  const token = authorization.split(' ')[1];
+  if (!token) {
+    return null;
+  }
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (error || !user) {
+    return null;
+  }
+  return user;
+}
+
 // Helper function to calculate H-Index
 function calculateHIndex(publications: any[]): number {
   if (!publications.length) return 0;
@@ -125,6 +141,48 @@ app.post('/make-server-936dcc19/faculty/create', async (c) => {
   } catch (error) {
     console.log('Error creating faculty:', error);
     return c.json({ error: 'Failed to create faculty' }, 500);
+  }
+});
+
+app.put('/make-server-936dcc19/faculty/update/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const body = await c.req.json();
+
+    // Get existing faculty data to preserve fields not being updated
+    const existingFaculty = await kv.get(`faculty:list:${id}`);
+    if (!existingFaculty) {
+      return c.json({ error: 'Faculty not found' }, 404);
+    }
+
+    // Merge new data with existing data
+    const updatedFaculty = {
+      ...existingFaculty, // Start with the original record
+      ...body, // Overwrite with new data from the form
+      id: id, // Ensure the ID is not changed
+      // Preserve calculated fields that are not part of the edit form
+      publications: existingFaculty.publications,
+      fdps: existingFaculty.fdps,
+      hIndex: existingFaculty.hIndex,
+      status: existingFaculty.status,
+    };
+
+    await kv.set(`faculty:list:${id}`, updatedFaculty);
+
+    // Also update the faculty's profile data if it exists
+    const facultyProfile = await kv.get(`faculty:${id}:profile`);
+    if (facultyProfile) { // Only update fields that are present in the body
+      const updatedProfile = {
+        ...facultyProfile,
+        ...body, // Apply the same updates
+      };
+      await kv.set(`faculty:${id}:profile`, updatedProfile);
+    }
+
+    return c.json({ success: true, faculty: updatedFaculty });
+  } catch (error) {
+    console.log('Error updating faculty:', error);
+    return c.json({ error: 'Failed to update faculty' }, 500);
   }
 });
 
@@ -251,7 +309,7 @@ async function sendCredentialsEmail(
               <p><strong>Security Note:</strong> Please change your password after your first login. Keep your credentials secure and do not share them with anyone.</p>
 
               <div class="footer">
-                <p>© 2024 Rabindranath Tagore University</p>
+                <p>© 2025 Rabindranath Tagore University</p>
                 <p>For support, contact: support@rntu.edu.in</p>
               </div>
             </div>
@@ -314,7 +372,7 @@ app.get('/make-server-936dcc19/faculty/profile', async (c) => {
 
 app.put('/make-server-936dcc19/faculty/profile', async (c) => {
   try {
-    const user = await verifyUser(c.req.header('Authorization'));
+    const user = await verifyUser(c.req.header('authorization'));
     if (!user) {
       return c.json({ error: 'Unauthorized' }, 401);
     }

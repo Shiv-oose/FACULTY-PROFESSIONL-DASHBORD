@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-
+import {React} from "react" ;
 interface AchievementBadgeProps {
   label: string;
   icon: string;

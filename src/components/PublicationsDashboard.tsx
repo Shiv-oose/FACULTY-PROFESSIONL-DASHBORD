@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { BookOpen, Award, TrendingUp, ExternalLink, Users } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { React, useState, useEffect } from 'react';
 import { apiClient } from '../utils/api';
 import D3BubbleChart from './D3BubbleChart';
 import D3NetworkGraph from './D3NetworkGraph';
@@ -325,7 +325,7 @@ export default function PublicationsDashboard() {
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-[#A0A0A0]">{author.publications} publications</span>
-                      <button className="text-[#00D9FF] hover:underline">View profile</button>
+                      {/* <button className="text-[#00D9FF] hover:underline">View profile</button> */}
                     </div>
                   </motion.div>
                 ))}

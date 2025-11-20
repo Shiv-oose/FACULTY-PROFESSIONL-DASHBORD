@@ -1,8 +1,8 @@
 import { motion } from 'motion/react';
 import { Users, BookOpen, TrendingUp, Award, CheckCircle2, Clock } from 'lucide-react';
 import { Card } from './ui/card';
-import { toast } from 'sonner@2.0.3';
-import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { React, useState } from 'react';
 
 export default function AdminDashboard() {
   const [pendingApprovals, setPendingApprovals] = useState([
@@ -41,7 +41,7 @@ export default function AdminDashboard() {
   };
 
   const handleReview = (faculty: string, program: string) => {
-    toast.info(`Opening review for ${program} - ${faculty}`);
+    toast(`Opening review for ${program} - ${faculty}`);
   };
 
   const stats = [

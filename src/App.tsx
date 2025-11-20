@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { React, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Home, BookOpen, Award, Calendar, Target, Menu, X, LogOut, Users } from 'lucide-react';
-import { Toaster } from './components/ui/sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './components/ui/dialog';
+import { Toaster } from 'react-hot-toast';
 import DashboardHome from './components/DashboardHome';
 import SkillsVisualization from './components/SkillsVisualization';
 import PublicationsDashboard from './components/PublicationsDashboard';
@@ -11,6 +12,7 @@ import DemoDataInitializer from './components/DemoDataInitializer';
 import Login from './components/Login';
 import AdminDashboard from './components/AdminDashboard';
 import FacultyManagement from './components/FacultyManagement';
+import { Button } from './components/ui/button';
 
 export default function App() {
   const [activeView, setActiveView] = useState('home');
@@ -19,6 +21,7 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<'faculty' | 'admin' | null>(null);
   const [userData, setUserData] = useState<any>(null);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
   const handleLoginSuccess = (role: 'faculty' | 'admin', user: any) => {
     setIsAuthenticated(true);
@@ -34,6 +37,7 @@ export default function App() {
     setUserData(null);
     setActiveView('home');
     setSidebarOpen(false);
+    setIsLogoutDialogOpen(false);
   };
 
   // Show login page if not authenticated
@@ -47,7 +51,7 @@ export default function App() {
     { id: 'faculty', label: 'Faculty', icon: Users },
     { id: 'publications', label: 'Publications', icon: BookOpen },
     { id: 'fdp', label: 'FDP Programs', icon: Calendar },
-    { id: 'analytics', label: 'Analytics', icon: Target },
+    // { id: 'analytics', label: 'Analytics', icon: Target },
   ];
 
   // Faculty navigation
@@ -72,18 +76,16 @@ export default function App() {
         case 'publications':
           return <PublicationsDashboard />;
         case 'fdp':
-          return <FDPCalendar />;
-        case 'analytics':
-          return <AdminDashboard />; // Will be replaced with Analytics component later
-        default:
-          return <AdminDashboard />;
+          return <FDPCalendar />;// Will be replaced with Analytics component later
+        // default:
+        //   return <AdminDashboard />;
       }
     }
 
     // Faculty views
     switch (activeView) {
       case 'home':
-        return <DashboardHome />;
+        return <DashboardHome onNavigate={setActiveView} />;
       case 'skills':
         return <SkillsVisualization />;
       case 'publications':
@@ -93,7 +95,7 @@ export default function App() {
       case 'goals':
         return <CareerRoadmap />;
       default:
-        return <DashboardHome />;
+        return <DashboardHome onNavigate={setActiveView} />;
     }
   };
 
@@ -150,7 +152,7 @@ export default function App() {
               </div>
             </div>
             <button
-              onClick={handleLogout}
+              onClick={() => setIsLogoutDialogOpen(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all duration-200 text-[#A0A0A0] hover:text-[#F0F0F0]"
             >
               <LogOut size={18} />
@@ -195,7 +197,7 @@ export default function App() {
                   );
                 })}
                 <button
-                  onClick={handleLogout}
+                  onClick={() => setIsLogoutDialogOpen(true)}
                   className="relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 group text-[#A0A0A0] hover:text-[#F0F0F0] hover:bg-white/5"
                 >
                   <LogOut size={20} />
@@ -229,6 +231,28 @@ export default function App() {
       {showInitializer && (
         <DemoDataInitializer onClose={() => setShowInitializer(false)} />
       )}
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
+        <DialogContent className="bg-[#16213E] border-white/10 text-[#F0F0F0] max-w-md" aria-describedby={undefined}>
+          <DialogHeader>
+            <DialogTitle className="text-2xl mb-2 text-[#FF006E]">Confirm Logout</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <p className="text-[#A0A0A0]">
+              Are you sure you want to end your session and log out?
+            </p>
+            <div className="flex gap-3 pt-4">
+              <Button onClick={handleLogout} className="flex-1 bg-[#FF006E] hover:bg-[#EA005E] text-white text-1xl">
+                Yes
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setIsLogoutDialogOpen(false)} className="text-[#A0A0A0] hover:text-[#F0F0F0] hover:bg-white/5 text-1xl">
+                No
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Toast Notifications */}
       <Toaster 

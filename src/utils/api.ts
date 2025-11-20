@@ -130,6 +130,13 @@ export class APIClient {
     });
   }
 
+  async updateFaculty(faculty: any) {
+    return this.request(`/faculty/update/${faculty.id}`, {
+      method: 'PUT',
+      body: JSON.stringify(faculty),
+    });
+  }
+
   async deleteFaculty(id: string) {
     return this.request(`/faculty/delete/${id}`, {
       method: 'DELETE',
