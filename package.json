@@ -1,4 +1,5 @@
 {
+      "homepage": "https://ayush-20221.github.io/FACULTY-PROFESSIONAL-DASHBOARD",
       "name": "Faculty-Professional-Track-Dashboard",
       "version": "0.1.0",
       "private": true,
@@ -36,6 +37,7 @@
             "cmdk": "^1.1.1",
             "d3": "^7",
             "embla-carousel-react": "^8.6.0",
+            "gh-pages": "^6.3.0",
             "hono": "^4",
             "input-otp": "^1.4.2",
             "lucide-react": "^0.487.0",
@@ -59,6 +61,8 @@
             "vite": "^6.4.1"
       },
       "scripts": {
+            "predeploy": "npm run build",
+            "deploy": "gh-pages -d build",
             "dev": "vite",
             "build": "vite build"
       }
